@@ -1,17 +1,15 @@
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
-from collections import Counter
-import math
-import threading
+import os
 import uvicorn
-import numpy as np
+from fastapi import FastAPI
+from pydantic import BaseModel
 import pennylane as qml
+import numpy as np
 
-# Setup quantum device
+# 🧠 Set up quantum device
 dev = qml.device("default.qubit", wires=2, shots=1000)
-
 app = FastAPI()
 
+# 🔐 Quantum encryption circuit
 @qml.qnode(dev)
 def qme_encrypt(message_bit):
     if message_bit == 1:
@@ -22,8 +20,16 @@ def qme_encrypt(message_bit):
     qml.RY(np.pi / 4, wires=1)
     return qml.sample(wires=[0, 1])
 
+# 🧊 Schema
+class EncryptRequest(BaseModel):
+    bit: int
+
+@app.get("/")
+def root():
+    return {"message": "Quantum API is live!"}
+
 @app.get("/encrypt")
-def encrypt(bit: int = Query(..., ge=0, le=1)):
+def encrypt(bit: int):
     sample = qme_encrypt(bit).tolist()
     return {
         "input_bit": bit,
@@ -33,7 +39,9 @@ def encrypt(bit: int = Query(..., ge=0, le=1)):
     }
 
 @app.get("/verify")
-def verify(bit: int = Query(..., ge=0, le=1)):
+def verify(bit: int):
+    from collections import Counter
+    import math
     sample = qme_encrypt(bit).tolist()
     counts = Counter(tuple(x) for x in sample)
     total = sum(counts.values())
@@ -43,5 +51,10 @@ def verify(bit: int = Query(..., ge=0, le=1)):
         "input_bit": bit,
         "output_distribution": probs,
         "entropy": round(entropy, 4),
-        "interpretation": "Higher entropy indicates more uniform encryption. Entangled bias shows mirrored influence."
+        "interpretation": "Higher entropy = more uniform encryption. Bias = mirrored entanglement."
     }
+
+# 🚀 Entry point for Render to launch FastAPI
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
