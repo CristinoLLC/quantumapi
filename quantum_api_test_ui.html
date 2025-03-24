@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quantum API Test UI</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 30px;
+      background: #0b0c10;
+      color: #ffffff;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    #output {
+      white-space: pre-wrap;
+      margin-top: 20px;
+      background: #1f1f1f;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    h1 {
+      color: #66fcf1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quantum API Playground</h1>
+
+  <label>Message Bit (0 or 1):</label>
+  <input type="number" id="bit" min="0" max="1" value="0"/>
+
+  <button onclick="encrypt()">🔐 Encrypt</button>
+  <button onclick="verify()">📊 Verify</button>
+
+  <div id="output">Results will appear here...</div>
+
+  <script>
+    const baseURL = "https://quantum-api-prb5.onrender.com";
+
+    async function encrypt() {
+      const bit = document.getElementById("bit").value;
+      const res = await fetch(`${baseURL}/encrypt?bit=${bit}`);
+      const data = await res.json();
+      document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function verify() {
+      const bit = document.getElementById("bit").value;
+      const res = await fetch(`${baseURL}/verify?bit=${bit}`);
+      const data = await res.json();
+      document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
